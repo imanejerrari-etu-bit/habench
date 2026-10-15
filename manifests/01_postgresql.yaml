@@ -1,0 +1,21 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: pg-habench
+  namespace: habench
+spec:
+  instances: 3
+  postgresql:
+    parameters:
+      max_connections: "100"
+      shared_buffers: "128MB"
+      synchronous_commit: "on"
+  storage:
+    size: 1Gi
+  resources:
+    requests:
+      cpu: "250m"
+      memory: "256Mi"
+    limits:
+      cpu: "500m"
+      memory: "512Mi"

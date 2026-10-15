@@ -1,0 +1,4 @@
+db,mode,n,mean_ms,std_ms,p50_ms,p95_ms,p99_ms,ci_low,ci_high,overhead_pct
+postgresql,async,10000,1.531,1.922,1.176,2.599,11.336,1.496,1.569,0.0
+postgresql,semi_sync,10000,4.697,3.308,3.796,8.192,17.371,4.636,4.764,206.8
+postgresql,sync,10000,4.577,3.217,3.745,7.894,16.823,4.516,4.64,199.0

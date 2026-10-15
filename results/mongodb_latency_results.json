@@ -1,0 +1,38 @@
+[
+  {
+    "db": "mongodb",
+    "mode": "async",
+    "w": 1,
+    "n": 10000,
+    "mean_ms": 36.37,
+    "std_ms": 83.815,
+    "p50_ms": 12,
+    "p95_ms": 108,
+    "p99_ms": 328,
+    "overhead_pct": 0
+  },
+  {
+    "db": "mongodb",
+    "mode": "semi_sync",
+    "w": 2,
+    "n": 10000,
+    "mean_ms": 19.141,
+    "std_ms": 24.251,
+    "p50_ms": 8,
+    "p95_ms": 67,
+    "p99_ms": 86,
+    "overhead_pct": -47.4
+  },
+  {
+    "db": "mongodb",
+    "mode": "sync",
+    "w": "majority",
+    "n": 10000,
+    "mean_ms": 25.689,
+    "std_ms": 30.702,
+    "p50_ms": 14,
+    "p95_ms": 68,
+    "p99_ms": 136,
+    "overhead_pct": -29.4
+  }
+]

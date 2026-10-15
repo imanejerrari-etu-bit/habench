@@ -1,0 +1,41 @@
+[
+  {
+    "db": "postgresql",
+    "mode": "async",
+    "n": 10000,
+    "mean_ms": 1.531,
+    "std_ms": 1.922,
+    "p50_ms": 1.176,
+    "p95_ms": 2.599,
+    "p99_ms": 11.336,
+    "ci_low": 1.496,
+    "ci_high": 1.569,
+    "overhead_pct": 0.0
+  },
+  {
+    "db": "postgresql",
+    "mode": "semi_sync",
+    "n": 10000,
+    "mean_ms": 4.697,
+    "std_ms": 3.308,
+    "p50_ms": 3.796,
+    "p95_ms": 8.192,
+    "p99_ms": 17.371,
+    "ci_low": 4.636,
+    "ci_high": 4.764,
+    "overhead_pct": 206.8
+  },
+  {
+    "db": "postgresql",
+    "mode": "sync",
+    "n": 10000,
+    "mean_ms": 4.577,
+    "std_ms": 3.217,
+    "p50_ms": 3.745,
+    "p95_ms": 7.894,
+    "p99_ms": 16.823,
+    "ci_low": 4.516,
+    "ci_high": 4.64,
+    "overhead_pct": 199.0
+  }
+]

@@ -1,0 +1,11 @@
+SET GLOBAL super_read_only=OFF;
+SET GLOBAL read_only=OFF;
+STOP GROUP_REPLICATION;
+DROP USER IF EXISTS 'repl'@'%';
+CREATE USER 'repl'@'%' IDENTIFIED WITH mysql_native_password BY 'repl2024';
+GRANT REPLICATION SLAVE, CONNECTION_ADMIN, BACKUP_ADMIN, GROUP_REPLICATION_STREAM ON *.* TO 'repl'@'%';
+FLUSH PRIVILEGES;
+RESET MASTER;
+CHANGE MASTER TO MASTER_USER='repl', MASTER_PASSWORD='repl2024' FOR CHANNEL 'group_replication_recovery';
+SET GLOBAL group_replication_group_seeds='mysql-0.mysql.habench.svc.cluster.local:33061';
+START GROUP_REPLICATION;

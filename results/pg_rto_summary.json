@@ -1,0 +1,14 @@
+{
+  "db": "postgresql",
+  "n_tests": 30,
+  "n_success": 30,
+  "mean_rto": 11.269,
+  "std_rto": 6.038,
+  "min_rto": 6.023,
+  "max_rto": 29.036,
+  "ci_low_95": 9.014,
+  "ci_high_95": 13.524,
+  "mean_rpo": 0,
+  "max_rpo": 0,
+  "success_rate": "30/30"
+}

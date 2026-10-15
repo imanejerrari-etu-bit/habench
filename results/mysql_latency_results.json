@@ -1,0 +1,41 @@
+[
+  {
+    "db": "mysql_gr",
+    "mode": "async",
+    "n": 10000,
+    "mean_ms": 24.486,
+    "std_ms": 15.935,
+    "p50_ms": 20.946,
+    "p95_ms": 41.422,
+    "p99_ms": 68.674,
+    "ci_low": 24.185,
+    "ci_high": 24.808,
+    "overhead_pct": 0.0
+  },
+  {
+    "db": "mysql_gr",
+    "mode": "semi_sync",
+    "n": 10000,
+    "mean_ms": 22.455,
+    "std_ms": 11.025,
+    "p50_ms": 19.933,
+    "p95_ms": 36.003,
+    "p99_ms": 54.047,
+    "ci_low": 22.238,
+    "ci_high": 22.662,
+    "overhead_pct": -8.3
+  },
+  {
+    "db": "mysql_gr",
+    "mode": "sync",
+    "n": 10000,
+    "mean_ms": 22.899,
+    "std_ms": 11.178,
+    "p50_ms": 20.142,
+    "p95_ms": 37.403,
+    "p99_ms": 62.236,
+    "ci_low": 22.679,
+    "ci_high": 23.126,
+    "overhead_pct": -6.5
+  }
+]

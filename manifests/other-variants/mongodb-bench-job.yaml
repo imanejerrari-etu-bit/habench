@@ -1,0 +1,103 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mongo-bench-script
+  namespace: habench
+data:
+  bench.py: |
+    import pymongo
+    import time
+    import uuid
+    import statistics
+    import json
+    from datetime import datetime, timezone
+
+    MONGO_URI = "mongodb://mongodb-0.mongodb.habench.svc.cluster.local:27017,mongodb-1.mongodb.habench.svc.cluster.local:27017,mongodb-2.mongodb.habench.svc.cluster.local:27017/?replicaSet=rs0"
+
+    MODES = {
+        'async':     1,
+        'semi_sync': 2,
+        'sync':      'majority'
+    }
+
+    N_INSERTIONS = 1000
+    N_RUNS       = 10
+    WARMUP       = 50
+
+    def get_col(w):
+        client = pymongo.MongoClient(MONGO_URI, serverSelectionTimeoutMS=15000)
+        col = client["habench_db"].get_collection(
+            "bench_writes",
+            write_concern=pymongo.WriteConcern(w=w, wtimeout=30000)
+        )
+        return client, col
+
+    def bench(mode_name, w):
+        print("[" + mode_name.upper() + "] w=" + str(w))
+        all_lats = []
+        for run in range(N_RUNS):
+            client, col = get_col(w)
+            for _ in range(WARMUP):
+                col.insert_one({"uuid": str(uuid.uuid4()), "payload": "x"*200, "mode": mode_name, "ts": datetime.now(timezone.utc)})
+            lats = []
+            for _ in range(N_INSERTIONS):
+                t0 = time.perf_counter()
+                col.insert_one({"uuid": str(uuid.uuid4()), "payload": "x"*200, "mode": mode_name, "ts": datetime.now(timezone.utc)})
+                lats.append((time.perf_counter() - t0) * 1000)
+            all_lats.extend(lats)
+            print("  Run " + str(run+1) + "/" + str(N_RUNS) + " mean=" + str(round(statistics.mean(lats),2)) + "ms")
+            client.close()
+        mean_v = statistics.mean(all_lats)
+        std_v  = statistics.stdev(all_lats)
+        def pct(p): return sorted(all_lats)[int(len(all_lats)*p//100)]
+        result = {
+            "db": "mongodb", "mode": mode_name, "w": str(w),
+            "n": len(all_lats),
+            "mean_ms": round(mean_v, 3),
+            "std_ms":  round(std_v, 3),
+            "p50_ms":  round(pct(50), 3),
+            "p95_ms":  round(pct(95), 3),
+            "p99_ms":  round(pct(99), 3),
+        }
+        print("RESULT: " + json.dumps(result))
+        return result
+
+    results = []
+    for mode_name, w in MODES.items():
+        results.append(bench(mode_name, w))
+
+    async_mean = next(r["mean_ms"] for r in results if r["mode"] == "async")
+    for r in results:
+        r["overhead_pct"] = round(((r["mean_ms"] - async_mean) / async_mean) * 100, 1)
+
+    print("\n===FINAL===")
+    for r in results:
+        print(r["mode"].ljust(12) + str(r["mean_ms"]).rjust(10) + "ms   P95=" + str(r["p95_ms"]) + "ms   overhead=" + str(r["overhead_pct"]) + "%")
+    print("JSON:" + json.dumps(results))
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mongo-bench
+  namespace: habench
+spec:
+  ttlSecondsAfterFinished: 600
+  template:
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: bench
+          image: python:3.11-slim
+          command:
+            - bash
+            - -c
+            - |
+              pip install pymongo --quiet &&
+              python /scripts/bench.py
+          volumeMounts:
+            - name: scripts
+              mountPath: /scripts
+      volumes:
+        - name: scripts
+          configMap:
+            name: mongo-bench-script

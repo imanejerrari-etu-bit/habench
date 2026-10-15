@@ -1,0 +1,14 @@
+test_id,primary_deleted,new_primary,rto_seconds,scripted_bootstrap_used,rpo_reported,rows_before_injection
+1,mysql-2,mysql-0,47.134,True,0,
+2,mysql-0,mysql-2,6.694,False,21,21
+3,mysql-2,mysql-0,47.599,True,0,
+4,mysql-0,mysql-2,6.208,False,28,28
+5,mysql-2,mysql-0,44.663,True,0,
+6,mysql-0,mysql-2,6.24,False,35,35
+7,mysql-2,mysql-0,46.205,True,0,
+8,mysql-0,mysql-2,6.13,False,42,42
+9,mysql-2,mysql-0,44.205,True,0,
+10,mysql-0,mysql-2,6.292,False,49,49
+11,mysql-2,mysql-0,44.685,True,0,
+12,mysql-0,mysql-2,6.566,False,56,56
+13,mysql-2,mysql-0,46.378,True,0,

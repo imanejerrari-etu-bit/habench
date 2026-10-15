@@ -1,0 +1,9 @@
+cff-version: 1.2.0
+message: "If you use HABench, please cite the accompanying paper."
+title: "HABench: A Benchmarking Framework for Evaluating High Availability of Heterogeneous Database Systems in Kubernetes Environments"
+authors:
+  - family-names: Jerrari
+    given-names: Imane
+  - family-names: Assayad
+    given-names: Ismail
+license: Apache-2.0

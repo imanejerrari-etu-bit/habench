@@ -1,0 +1,14 @@
+{
+  "db": "mongodb",
+  "n_tests": 30,
+  "n_success": 29,
+  "mean_rto": 2.918,
+  "std_rto": 0.742,
+  "min_rto": 2.361,
+  "max_rto": 5.573,
+  "ci_low_95": 2.636,
+  "ci_high_95": 3.201,
+  "mean_rpo": 0,
+  "max_rpo": 0,
+  "success_rate": "29/30"
+}

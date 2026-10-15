@@ -1,0 +1,124 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql
+  namespace: habench
+spec:
+  clusterIP: None
+  selector:
+    app: mysql
+  ports:
+    - port: 3306
+      name: mysql
+    - port: 33061
+      name: gr
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql-primary
+  namespace: habench
+spec:
+  selector:
+    app: mysql
+  ports:
+    - port: 3306
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mysql
+  namespace: habench
+spec:
+  serviceName: mysql
+  replicas: 3
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      initContainers:
+        - name: init-mysql
+          image: mysql:8.0.35
+          env:
+            - name: POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+          command:
+            - bash
+            - "-c"
+            - |
+              set -ex
+              [[ ${POD_NAME} =~ -([0-9]+)$ ]] || exit 1
+              ordinal=${BASH_REMATCH[1]}
+              FQDN="${POD_NAME}.mysql.habench.svc.cluster.local"
+              cat > /mnt/conf.d/server-id.cnf << EOF
+              [mysqld]
+              server-id=$((100 + $ordinal))
+              log_bin=binlog
+              binlog_format=ROW
+              gtid_mode=ON
+              enforce_gtid_consistency=ON
+              master_info_repository=TABLE
+              relay_log_info_repository=TABLE
+              binlog_checksum=NONE
+              log_slave_updates=ON
+              transaction_write_set_extraction=XXHASH64
+              report_host=${FQDN}
+              loose_group_replication_group_name=aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee
+              loose_group_replication_start_on_boot=ON
+              loose_group_replication_local_address=${FQDN}:33061
+              loose_group_replication_group_seeds=mysql-0.mysql.habench.svc.cluster.local:33061,mysql-1.mysql.habench.svc.cluster.local:33061,mysql-2.mysql.habench.svc.cluster.local:33061
+              loose_group_replication_bootstrap_group=OFF
+              loose_group_replication_single_primary_mode=ON
+              loose_group_replication_recovery_get_public_key=ON
+              EOF
+          volumeMounts:
+            - name: conf
+              mountPath: /mnt/conf.d
+      containers:
+        - name: mysql
+          image: mysql:8.0.35
+          env:
+            - name: MYSQL_ROOT_PASSWORD
+              value: "habench2024"
+            - name: MYSQL_DATABASE
+              value: "habench_db"
+          args:
+            - --plugin-load-add=group_replication.so
+          ports:
+            - containerPort: 3306
+            - containerPort: 33061
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "500m"
+              memory: "1Gi"
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/mysql
+            - name: conf
+              mountPath: /etc/mysql/conf.d
+          readinessProbe:
+            exec:
+              command: ["mysqladmin", "ping", "-uroot", "-phabench2024"]
+            initialDelaySeconds: 40
+            periodSeconds: 10
+            timeoutSeconds: 5
+      volumes:
+        - name: conf
+          emptyDir: {}
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 1Gi

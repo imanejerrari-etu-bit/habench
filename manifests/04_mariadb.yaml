@@ -1,0 +1,103 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mariadb
+  namespace: habench
+spec:
+  clusterIP: None
+  selector:
+    app: mariadb
+  ports:
+    - port: 3306
+      name: mysql
+    - port: 4567
+      name: galera
+    - port: 4568
+      name: ist
+    - port: 4444
+      name: sst
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: mariadb-primary
+  namespace: habench
+spec:
+  selector:
+    app: mariadb
+  ports:
+    - port: 3306
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mariadb
+  namespace: habench
+spec:
+  serviceName: mariadb
+  replicas: 3
+  selector:
+    matchLabels:
+      app: mariadb
+  template:
+    metadata:
+      labels:
+        app: mariadb
+    spec:
+      containers:
+        - name: mariadb
+          image: bitnami/mariadb-galera:latest
+          env:
+            - name: MARIADB_ROOT_PASSWORD
+              value: "habench2024"
+            - name: MARIADB_DATABASE
+              value: "habench_db"
+            - name: MARIADB_USER
+              value: "habench"
+            - name: MARIADB_PASSWORD
+              value: "habench2024"
+            - name: MARIADB_GALERA_CLUSTER_NAME
+              value: "galera-cluster"
+            - name: MARIADB_GALERA_CLUSTER_ADDRESS
+              value: "gcomm://mariadb-0.mariadb.habench.svc.cluster.local,mariadb-1.mariadb.habench.svc.cluster.local,mariadb-2.mariadb.habench.svc.cluster.local"
+            - name: MARIADB_GALERA_MARIABACKUP_USER
+              value: "backupuser"
+            - name: MARIADB_GALERA_MARIABACKUP_PASSWORD
+              value: "backup2024"
+            - name: MARIADB_GALERA_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: MARIADB_GALERA_NODE_ADDRESS
+              valueFrom:
+                fieldRef:
+                  fieldPath: status.podIP
+          ports:
+            - containerPort: 3306
+            - containerPort: 4567
+            - containerPort: 4568
+            - containerPort: 4444
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "512Mi"
+            limits:
+              cpu: "500m"
+              memory: "1Gi"
+          volumeMounts:
+            - name: data
+              mountPath: /bitnami/mariadb
+          readinessProbe:
+            exec:
+              command: ["bash", "-c", "mysqladmin ping -uroot -phabench2024"]
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        resources:
+          requests:
+            storage: 2Gi

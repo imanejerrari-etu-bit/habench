@@ -1,0 +1,4 @@
+db,mode,w,n,mean_ms,std_ms,p50_ms,p95_ms,p99_ms,overhead_pct
+mongodb,async,1,10000,36.37,83.815,12,108,328,0
+mongodb,semi_sync,2,10000,19.141,24.251,8,67,86,-47.4
+mongodb,sync,majority,10000,25.689,30.702,14,68,136,-29.4

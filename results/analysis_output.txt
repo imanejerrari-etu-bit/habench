@@ -1,0 +1,26 @@
+=== RTO (seconds) ===
+PostgreSQL (CloudNativePG): n=30 mean=11.269 sd=6.038 median=8.891 IQR=[7.31, 12.52] min=6.023 max=29.036
+   Shapiro-Wilk W=0.741 p=6.5e-06;  95% bootstrap CI of the mean = [9.33, 13.54]
+MongoDB (replica set): n=29 mean=2.918 sd=0.742 median=2.518 IQR=[2.43, 3.51] min=2.361 max=5.573
+   Shapiro-Wilk W=0.722 p=4.5e-06;  95% bootstrap CI of the mean = [2.68, 3.21]
+PostgreSQL vs MongoDB: Mann-Whitney U=870 p=4.5e-11  Cliff's delta=1.00  Cohen's d=1.92
+
+=== MySQL Group Replication, run of 2026-03-13 (transcribed from the console log) ===
+tests logged: 13; recovered without scripted bootstrap: 6; with scripted bootstrap: 7
+no bootstrap : mean=6.355 sd=0.223 min=6.130 max=6.694
+bootstrap    : mean=45.838 sd=1.328 min=44.205 max=47.599
+RPO values logged by this script are not reliable (row count unavailable on some pods).
+
+=== Write latency (from results/*_latency_results.csv) ===
+        db      mode     n  mean_ms  std_ms  p50_ms  p95_ms  p99_ms  ci_low  ci_high  overhead_pct
+postgresql     async 10000    1.531   1.922   1.176   2.599  11.336   1.496    1.569           0.0
+postgresql semi_sync 10000    4.697   3.308   3.796   8.192  17.371   4.636    4.764         206.8
+postgresql      sync 10000    4.577   3.217   3.745   7.894  16.823   4.516    4.640         199.0
+      db      mode     n  mean_ms  std_ms  p50_ms  p95_ms  p99_ms  ci_low  ci_high  overhead_pct
+mysql_gr     async 10000   24.486  15.935  20.946  41.422  68.674  24.185   24.808           0.0
+mysql_gr semi_sync 10000   22.455  11.025  19.933  36.003  54.047  22.238   22.662          -8.3
+mysql_gr      sync 10000   22.899  11.178  20.142  37.403  62.236  22.679   23.126          -6.5
+     db      mode        w     n  mean_ms  std_ms  p50_ms  p95_ms  p99_ms  overhead_pct
+mongodb     async        1 10000   36.370  83.815      12     108     328           0.0
+mongodb semi_sync        2 10000   19.141  24.251       8      67      86         -47.4
+mongodb      sync majority 10000   25.689  30.702      14      68     136         -29.4
